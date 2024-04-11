@@ -244,8 +244,8 @@ module dct_4x4_dma_top #(
     );
 
     dct_4x4 #(
-        .PERF_OPT_ROW(1),
-        .PERF_OPT_COL(1)
+        .PERF_OPT_ROW(0),
+        .PERF_OPT_COL(0)
     ) u_dct_4x4(
         .clk  (ap_clk),
         .reset(areset),
