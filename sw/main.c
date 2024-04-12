@@ -22,20 +22,20 @@
 
 void hw_dct(void* dest, const void* source, size_t num) {
     u32 read_data;
-	Xil_Out32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_RDMA_TRANSFER_BYTE_DATA_0, (u32)num);
-	Xil_Out32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_RDMA_MEM_PTR_DATA_0, (u32) source );
-	Xil_Out32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_WDMA_TRANSFER_BYTE_DATA_0, (u32)num);
-	Xil_Out32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_WDMA_MEM_PTR_DATA_0, (u32) dest);
+	Xil_Out32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_RDMA_TRANSFER_BYTE_DATA_0, (u32)num);
+	Xil_Out32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_RDMA_MEM_PTR_DATA_0, (u32) source );
+	Xil_Out32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_WDMA_TRANSFER_BYTE_DATA_0, (u32)num);
+	Xil_Out32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_WDMA_MEM_PTR_DATA_0, (u32) dest);
 
 	while(1) {
-		read_data = Xil_In32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_AP_CTRL);
+		read_data = Xil_In32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_AP_CTRL);
 	    if( (read_data & CTRL_IDLE_MASK) == CTRL_IDLE_MASK ) // IDLE check
 	    	break;
 	}
-	Xil_Out32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_AP_CTRL, (u32)(0x00000001)); // start
+	Xil_Out32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_AP_CTRL, (u32)(0x00000001)); // start
 
  	while(1) {
-		read_data = Xil_In32((XPAR_DMA_IP_TOP_0_BASEADDR) + ADDR_AP_CTRL);
+		read_data = Xil_In32((XPAR_DCT_4X4_DMA_TOP_0_BASEADDR) + ADDR_AP_CTRL);
 	    if( (read_data & CTRL_DONE_MASK) == CTRL_DONE_MASK ) // DONE check
 	    	break;
 	}
