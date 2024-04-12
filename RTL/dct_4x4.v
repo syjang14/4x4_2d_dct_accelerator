@@ -26,15 +26,18 @@ module dct_4x4 #(
     reg row_valid;
     reg col_valid;
     reg weight_valid;
+    reg dct_valid;
 
     wire row_ready;
     wire col_ready;
+    wire weight_ready;
+    wire dct_ready;
 
-    wire        [7:0]  x[0:3][0:3];
-    reg  signed [11:0] row_out[0:3][0:3];
-    reg  signed [14:0] col_out[0:3][0:3];
-    wire signed [19:0] w_dct_out[0:3][0:3];
-    reg  signed [15:0] dct_out[0:3][0:3];
+    wire        [7:0] x[0:3][0:3];
+    reg signed [11:0] row_out[0:3][0:3];
+    reg signed [14:0] col_out[0:3][0:3];
+    reg signed [19:0] weight_out[0:3][0:3];
+    reg signed [15:0] dct_out[0:3][0:3];
 
     // weight coeffient
     // 1bit - 0bit - 5bit (sign - integer - fractional)
@@ -204,62 +207,71 @@ module dct_4x4 #(
     endgenerate
 
 // weight multiply (hadamard)
-    assign col_ready = o_ready | ~o_valid;
+    assign col_ready = weight_ready | ~weight_valid;
     always @(posedge clk) begin
         if(reset) begin
             weight_valid <= 'd0;
+            for(n=0; n<4; n=n+1) begin
+                for(m=0; m<4; m=m+1) begin
+                    weight_out[n][m] <= 'd0;
+                end
+            end
+        end
+        // 1bit - 12bit - 5bit (sign - integer - fractional)
+        else if(col_ready) begin
+            weight_valid <= col_valid;
+            weight_out[0][0] <= coeff_C * col_out[0][0];
+            weight_out[0][1] <= coeff_B * col_out[0][1];
+            weight_out[0][2] <= coeff_C * col_out[0][2];
+            weight_out[0][3] <= coeff_B * col_out[0][3];
+            weight_out[1][0] <= coeff_B * col_out[1][0];
+            weight_out[1][1] <= coeff_A * col_out[1][1];
+            weight_out[1][2] <= coeff_B * col_out[1][2];
+            weight_out[1][3] <= coeff_A * col_out[1][3];
+            weight_out[2][0] <= coeff_C * col_out[2][0];
+            weight_out[2][1] <= coeff_B * col_out[2][1];
+            weight_out[2][2] <= coeff_C * col_out[2][2];
+            weight_out[2][3] <= coeff_B * col_out[2][3];
+            weight_out[3][0] <= coeff_B * col_out[3][0];
+            weight_out[3][1] <= coeff_A * col_out[3][1];
+            weight_out[3][2] <= coeff_B * col_out[3][2];
+            weight_out[3][3] <= coeff_A * col_out[3][3];
+        end
+    end
+
+    assign weight_ready = dct_ready | ~dct_valid;
+    always @(posedge clk) begin
+        if(reset) begin
+            dct_valid <= 'd0;
             for(n=0; n<4; n=n+1) begin
                 for(m=0; m<4; m=m+1) begin
                     dct_out[n][m] <= 'd0;
                 end
             end
         end
-        else if(col_ready) begin
-            weight_valid <= col_valid;
-            // 1bit - 11bit - 4bit (sign - integer - fractional)
-            dct_out[0][0] <= {w_dct_out[0][0][19], w_dct_out[0][0][15:5], w_dct_out[0][0][4:1]};
-            dct_out[0][1] <= {w_dct_out[0][1][19], w_dct_out[0][1][15:5], w_dct_out[0][1][4:1]};
-            dct_out[0][2] <= {w_dct_out[0][2][19], w_dct_out[0][2][15:5], w_dct_out[0][2][4:1]};
-            dct_out[0][3] <= {w_dct_out[0][3][19], w_dct_out[0][3][15:5], w_dct_out[0][3][4:1]};
-            dct_out[1][0] <= {w_dct_out[1][0][19], w_dct_out[1][0][15:5], w_dct_out[1][0][4:1]};
-            dct_out[1][1] <= {w_dct_out[1][1][19], w_dct_out[1][1][15:5], w_dct_out[1][1][4:1]};
-            dct_out[1][2] <= {w_dct_out[1][2][19], w_dct_out[1][2][15:5], w_dct_out[1][2][4:1]};
-            dct_out[1][3] <= {w_dct_out[1][3][19], w_dct_out[1][3][15:5], w_dct_out[1][3][4:1]};
-            dct_out[2][0] <= {w_dct_out[2][0][19], w_dct_out[2][0][15:5], w_dct_out[2][0][4:1]};
-            dct_out[2][1] <= {w_dct_out[2][1][19], w_dct_out[2][1][15:5], w_dct_out[2][1][4:1]};
-            dct_out[2][2] <= {w_dct_out[2][2][19], w_dct_out[2][2][15:5], w_dct_out[2][2][4:1]};
-            dct_out[2][3] <= {w_dct_out[2][3][19], w_dct_out[2][3][15:5], w_dct_out[2][3][4:1]};
-            dct_out[3][0] <= {w_dct_out[3][0][19], w_dct_out[3][0][15:5], w_dct_out[3][0][4:1]};
-            dct_out[3][1] <= {w_dct_out[3][1][19], w_dct_out[3][1][15:5], w_dct_out[3][1][4:1]};
-            dct_out[3][2] <= {w_dct_out[3][2][19], w_dct_out[3][2][15:5], w_dct_out[3][2][4:1]};
-            dct_out[3][3] <= {w_dct_out[3][3][19], w_dct_out[3][3][15:5], w_dct_out[3][3][4:1]};
+        else if(weight_ready) begin
+            dct_valid <= weight_valid;
+            dct_out[0][0] <= {weight_out[0][0][19], weight_out[0][0][15:5], weight_out[0][0][4:1]};
+            dct_out[0][1] <= {weight_out[0][1][19], weight_out[0][1][15:5], weight_out[0][1][4:1]};
+            dct_out[0][2] <= {weight_out[0][2][19], weight_out[0][2][15:5], weight_out[0][2][4:1]};
+            dct_out[0][3] <= {weight_out[0][3][19], weight_out[0][3][15:5], weight_out[0][3][4:1]};
+            dct_out[1][0] <= {weight_out[1][0][19], weight_out[1][0][15:5], weight_out[1][0][4:1]};
+            dct_out[1][1] <= {weight_out[1][1][19], weight_out[1][1][15:5], weight_out[1][1][4:1]};
+            dct_out[1][2] <= {weight_out[1][2][19], weight_out[1][2][15:5], weight_out[1][2][4:1]};
+            dct_out[1][3] <= {weight_out[1][3][19], weight_out[1][3][15:5], weight_out[1][3][4:1]};
+            dct_out[2][0] <= {weight_out[2][0][19], weight_out[2][0][15:5], weight_out[2][0][4:1]};
+            dct_out[2][1] <= {weight_out[2][1][19], weight_out[2][1][15:5], weight_out[2][1][4:1]};
+            dct_out[2][2] <= {weight_out[2][2][19], weight_out[2][2][15:5], weight_out[2][2][4:1]};
+            dct_out[2][3] <= {weight_out[2][3][19], weight_out[2][3][15:5], weight_out[2][3][4:1]};
+            dct_out[3][0] <= {weight_out[3][0][19], weight_out[3][0][15:5], weight_out[3][0][4:1]};
+            dct_out[3][1] <= {weight_out[3][1][19], weight_out[3][1][15:5], weight_out[3][1][4:1]};
+            dct_out[3][2] <= {weight_out[3][2][19], weight_out[3][2][15:5], weight_out[3][2][4:1]};
+            dct_out[3][3] <= {weight_out[3][3][19], weight_out[3][3][15:5], weight_out[3][3][4:1]};
         end
     end
 
-
-    // coeff_A = 0.1
-    // coeff_B = 1/(2*sqrt(10)) = 0.158113883
-    // coeff_C = 0.25
-    // 1bit - 12bit - 5bit (sign - integer - fractional)
-    assign w_dct_out[0][0] = coeff_C * col_out[0][0];
-    assign w_dct_out[0][1] = coeff_B * col_out[0][1];
-    assign w_dct_out[0][2] = coeff_C * col_out[0][2];
-    assign w_dct_out[0][3] = coeff_B * col_out[0][3];
-    assign w_dct_out[1][0] = coeff_B * col_out[1][0];
-    assign w_dct_out[1][1] = coeff_A * col_out[1][1];
-    assign w_dct_out[1][2] = coeff_B * col_out[1][2];
-    assign w_dct_out[1][3] = coeff_A * col_out[1][3];
-    assign w_dct_out[2][0] = coeff_C * col_out[2][0];
-    assign w_dct_out[2][1] = coeff_B * col_out[2][1];
-    assign w_dct_out[2][2] = coeff_C * col_out[2][2];
-    assign w_dct_out[2][3] = coeff_B * col_out[2][3];
-    assign w_dct_out[3][0] = coeff_B * col_out[3][0];
-    assign w_dct_out[3][1] = coeff_A * col_out[3][1];
-    assign w_dct_out[3][2] = coeff_B * col_out[3][2];
-    assign w_dct_out[3][3] = coeff_A * col_out[3][3];
-
 // assign output
-    assign o_valid = weight_valid;
+    assign o_valid = dct_valid;
     assign o_data = {
         dct_out[0][0], dct_out[0][1], dct_out[0][2], dct_out[0][3],
         dct_out[1][0], dct_out[1][1], dct_out[1][2], dct_out[1][3],
@@ -267,8 +279,5 @@ module dct_4x4 #(
         dct_out[3][0], dct_out[3][1], dct_out[3][2], dct_out[3][3]
     };
 
-
-
-// combination logic for performance optimization
 
 endmodule
