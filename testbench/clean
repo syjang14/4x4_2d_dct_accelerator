@@ -1,0 +1,1 @@
+rm -rf *.log *.pb *.jou .Xil xsim.dir

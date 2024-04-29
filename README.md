@@ -15,7 +15,7 @@ AXI 인터페이스를 익히고 RTL 설계를 경험하기 위한 프로젝트�
 
 # How to run
 ## Run testbench
-1. (linux) "./testbench/run 파일 실행
+1. (linux) "./testbench/run" 파일 실행
 
 ## Run on FPGA (Zybo Z7-10)
 1. (window) Xilinx Vitis 실행

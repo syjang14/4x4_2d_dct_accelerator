@@ -1,0 +1,3 @@
+xvlog -sv -L xilinx_vip -f ./file_list
+xelab tb_dct_4x4_dma_top -L xilinx_vip -debug all -s tb_dct_4x4_dma_top
+xsim tb_dct_4x4_dma_top -gui
