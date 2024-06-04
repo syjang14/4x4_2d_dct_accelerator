@@ -10,7 +10,7 @@ AXI 인터페이스를 익히고 RTL 설계를 경험하기 위한 프로젝트�
     - Xilinx Vitis 2020.2 (window)
 
 # Block diagram
-![block_diagram](https://github.com/syjang14/4x4_2d_dct_accelerator/assets/59993682/6fcaea91-bc70-42c7-b53c-6c98c5e86d1b)
+![block_diagram](https://github.com/syjang14/4x4_2d_dct_accelerator/assets/59993682/5eafb7ec-db6c-4714-9540-5be40d31dcf9)
 
 
 # How to run
