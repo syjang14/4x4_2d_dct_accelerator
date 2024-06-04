@@ -116,7 +116,7 @@ module wdma
 
 	wire [12:0]                addr_4k = 13'h1000;
     wire [NUM_AWLEN_BIT-1:0]   normal_burst_len;
-    wire [NUM_AWLEN_BIT-1:0]   boudary_burst_len;
+    wire [NUM_AWLEN_BIT-1:0]   boundary_burst_len;
     wire                       is_4k_boundary;
     wire [12-AXI_DATA_SHIFT:0] last_addr_in_nxt_burst;
 
@@ -249,10 +249,10 @@ end
 	assign w_m_axi_gmem_AWADDR = r_wdma_base_addr + wdma_offset_addr;
 
 // burst length
-	assign burst_len_aw = is_4k_boundary ? boudary_burst_len : normal_burst_len;
+	assign burst_len_aw = is_4k_boundary ? boundary_burst_len : normal_burst_len;
 
     assign normal_burst_len = (remain_hs >= NUM_MAX_BURST) ? NUM_MAX_BURST : remain_hs;
-    assign boudary_burst_len = addr_4k[12:AXI_DATA_SHIFT] - w_m_axi_gmem_AWADDR[11:AXI_DATA_SHIFT];
+    assign boundary_burst_len = addr_4k[12:AXI_DATA_SHIFT] - w_m_axi_gmem_AWADDR[11:AXI_DATA_SHIFT];
     assign is_4k_boundary = (last_addr_in_nxt_burst > addr_4k[12:AXI_DATA_SHIFT]);
     assign last_addr_in_nxt_burst = w_m_axi_gmem_AWADDR[11:AXI_DATA_SHIFT] + normal_burst_len;
 
